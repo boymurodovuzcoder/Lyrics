@@ -5,11 +5,17 @@
         <label for="exampleFormControlTextarea1">Enter lyrics:</label>
         <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" v-model="lyrics"></textarea>
     </div>
-    <div class="form-group">
-      <label for="exampleFormControlInput1">Number of Omitting Words: </label>
-      <input type="number" class="form-control" id="exampleFormControlInput1" v-model="omitNumber">
+    <div class="form-group row">
+      <div class="col">
+          <label for="Music">Upload Music</label>
+          <input type="file" class="form-control-file" id="Music">
+      </div>
+      <div class="col">
+        <label for="Number">Number of Omitting Words: </label>
+        <input type="number" class="form-control" id="Number" v-model="omitNumber">
+      </div>
     </div>
-    <button type="button" @click="startAction()" class="btn btn-primary">Start!</button>
+    <button type="button" @click="startAction()"  class="btn btn-primary btn-lg btn-block">Start!</button>
   <div>
     <xmp>
       <span v-html="formatted"></span>
@@ -17,6 +23,7 @@
   </div>
   <div>
     <button type="button" @click="endAction()" class="btn btn-primary">End!</button>
+    <button type="button" @click="showAnswers()" class="btn btn-warning" style="margin-left: 1rem;">Show Answers</button>
   </div>
     </div>
   </q-page>
@@ -41,6 +48,12 @@ export default {
         } else {
           document.getElementById(`${i}`).style.borderColor = 'red'
         }
+      }
+    },
+    showAnswers () {
+      for (var i = 0; i < this.result.length; i++) {
+        document.getElementById(`${i}`).value = this.result[i]
+        document.getElementById(`${i}`).style.borderColor = 'green'
       }
     },
     startAction () {
