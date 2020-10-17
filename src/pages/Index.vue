@@ -5,6 +5,7 @@
         <div id="detail" v-if="detail">
             <div class="form-group area">
             <label for="exampleFormControlTextarea1">Enter lyrics:</label>
+            <button type="button" class="btn btn-secondary" @click="lyrics=''">Clear</button>
             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" v-model="lyrics"></textarea>
         </div>
         <div class="form-group row area">
@@ -13,14 +14,14 @@
               <input type="file" class="form-control-file" id="upload" @change="handleFiles">
           </div>
           <div class="col">
-            <label for="Number">Number of Omitting Words: </label>
-            <input type="number" class="form-control" id="Number" v-model="omitNumber">
+            <label for="Number">Enter Number of Omitting Words: </label>
+            <input type="number" class="form-control" id="Number" v-model="omitNumber" :placeholder="recommendation">
           </div>
         </div>
         <button type="button" @click="startAction()"  class="btn btn-primary btn-lg btn-block">Start!</button>
       </div>
       </transition>
-      <button v-if="!detail" type="button" class="btn btn-info" style="margin-top: 1rem;" @click="detail=!detail">Back!</button>
+      <button v-if="!detail" type="button" class="btn btn-info" style="margin-top: 1rem;" @click="backAction()">Back!</button>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
         <audio id="audio" controls style="width:100%;">
           <source src="" id="src" />
@@ -56,10 +57,33 @@ export default {
       mp3Url: null
     }
   },
+  computed: {
+    recommendation: function () {
+      var copyArray = []
+      if (this.lyrics) {
+        var r = /(\w|\s)*\w(?=")|\w+('\w+)?/gm
+        var array = this.lyrics.match(r)
+        array.forEach(word => {
+          if ((word.length > 3) && (word.indexOf("'") === -1)) {
+            copyArray.push(word)
+          }
+        })
+      }
+      var result = ''
+      copyArray.length > 1 ? result = copyArray.length + ' words are available' : result = copyArray.length + ' word is available'
+      return result
+    }
+  },
   methods: {
     handleFiles (event) {
       var files = event.target.files
       this.mp3Url = URL.createObjectURL(files[0])
+    },
+    backAction () {
+      this.detail = !this.detail
+      if (this.mp3Url) {
+        document.getElementById('audio').pause()
+      }
     },
     endAction () {
       for (var i = 0; i < this.result.length; i++) {
@@ -77,14 +101,6 @@ export default {
       }
     },
     startAction () {
-      if (this.omitNumber && this.lyrics) {
-        this.detail = false
-      }
-      if (this.mp3Url) {
-        $('#src').attr('src', this.mp3Url)
-        document.getElementById('audio').load()
-        document.getElementById('audio').play()
-      }
       if (!this.lyrics) {
         alert('Textarea is empty!')
       } else if (!this.omitNumber) {
@@ -98,18 +114,27 @@ export default {
             copyArray.push(word)
           }
         })
-        console.log(copyArray)
-        var result = this.getRandom(copyArray, this.omitNumber)
-        var lyrics = this.lyrics
-        var index = 0
-        result.forEach(word => {
-          lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}">`)
-          index += 1
-        })
-        this.formatted = lyrics
-        console.log(result)
-        this.result = result
-        console.log(lyrics)
+        if (this.omitNumber > copyArray.length) {
+          alert(`${this.omitNumber} words can not be omitted!`)
+        } else {
+          this.detail = !this.detail
+          if (this.mp3Url) {
+            $('#src').attr('src', this.mp3Url)
+            document.getElementById('audio').load()
+            document.getElementById('audio').play()
+          }
+          var result = this.getRandom(copyArray, this.omitNumber)
+          var lyrics = this.lyrics
+          var index = 0
+          result.forEach(word => {
+            lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}">`)
+            index += 1
+          })
+          this.formatted = lyrics
+          console.log(result)
+          this.result = result
+          console.log(lyrics)
+        }
       }
     },
     getRandom (arr, n) {
@@ -151,5 +176,8 @@ export default {
     100% {
       transform: scale(1);
     }
+  }
+  .btn-secondary {
+    float: right;
   }
 </style>
