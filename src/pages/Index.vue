@@ -1,19 +1,20 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center back">
     <div class="container container-fluid">
       <transition name="bounce">
         <div id="detail" v-if="detail">
             <div class="form-group area">
             <label for="exampleFormControlTextarea1">Enter lyrics:</label>
             <button type="button" class="btn btn-secondary" @click="lyrics=''">Clear</button>
+            <button type="button" class="btn btn-success" @click="pasteAction()">Paste</button>
             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" v-model="lyrics"></textarea>
         </div>
-        <div class="form-group row area">
+        <div class="form-group row area block-space">
           <div class="col">
               <label for="upload">Upload Music</label>
               <input type="file" class="form-control-file" id="upload" @change="handleFiles">
           </div>
-          <div class="col">
+          <div class="col omitNumb">
             <label for="Number">Enter Number of Omitting Words: </label>
             <input type="number" class="form-control" id="Number" v-model="omitNumber" :placeholder="recommendation">
           </div>
@@ -21,7 +22,7 @@
         <button type="button" @click="startAction()"  class="btn btn-primary btn-lg btn-block">Start!</button>
       </div>
       </transition>
-      <button v-if="!detail" type="button" class="btn btn-info" style="margin-top: 1rem;" @click="backAction()">Back!</button>
+      <button v-if="!detail" type="button" class="btn btn-info" style="margin-top: 1rem;" @click="backAction()">Back</button>
       <div style="margin-top: 1rem; margin-bottom: 1rem;">
         <audio id="audio" controls style="width:100%;">
           <source src="" id="src" />
@@ -29,13 +30,14 @@
       </div>
         <transition name="bounce">
           <div v-if="!detail" style="margin-top: 1rem; margin-bottom: 1rem;">
-          <div>
+          <div class="pre">
             <xmp>
               <span v-html="formatted"></span>
             </xmp>
           </div>
           <button type="button" @click="endAction()" class="btn btn-primary">Finish!</button>
           <button type="button" @click="showAnswers()" class="btn btn-warning" style="margin-left: 1rem;">Show Answers</button>
+          <button v-if="!detail" type="button" class="btn btn-info" style="margin-left: 1rem;" @click="backAction()">Back</button>
         </div>
         </transition>
     </div>
@@ -50,7 +52,7 @@ export default {
   data () {
     return {
       detail: true,
-      lyrics: null,
+      lyrics: '',
       omitNumber: null,
       formatted: null,
       result: null,
@@ -79,6 +81,11 @@ export default {
       var files = event.target.files
       this.mp3Url = URL.createObjectURL(files[0])
     },
+    pasteAction () {
+      navigator.clipboard.readText().then(text => {
+        this.lyrics += text
+      })
+    },
     backAction () {
       this.detail = !this.detail
       if (this.mp3Url) {
@@ -88,16 +95,19 @@ export default {
     endAction () {
       for (var i = 0; i < this.result.length; i++) {
         if (this.result[i].toLocaleLowerCase() === document.getElementById(`${i}`).value.toLocaleLowerCase()) {
-          document.getElementById(`${i}`).style.borderColor = 'green'
+          $(`#${i}`).css('border-color', 'green')
+          $(`#${i}`).css('border-width', '0.2rem')
         } else {
-          document.getElementById(`${i}`).style.borderColor = 'red'
+          $(`#${i}`).css('border-color', 'red')
+          $(`#${i}`).css('border-width', '0.2rem')
         }
       }
     },
     showAnswers () {
       for (var i = 0; i < this.result.length; i++) {
-        document.getElementById(`${i}`).value = this.result[i]
-        document.getElementById(`${i}`).style.borderColor = 'green'
+        $(`#${i}`).val(this.result[i])
+        $(`#${i}`).css('border-color', 'green')
+        $(`#${i}`).css('border-width', '0.2rem')
       }
     },
     startAction () {
@@ -127,7 +137,7 @@ export default {
           var lyrics = this.lyrics
           var index = 0
           result.forEach(word => {
-            lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}">`)
+            lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}" oninput="event.target.value.length == ${word.length} ? $('#${index}').next().focus() : console.log('')">`)
             index += 1
           })
           this.formatted = lyrics
@@ -179,5 +189,47 @@ export default {
   }
   .btn-secondary {
     float: right;
+    margin-left: 0.5rem;
+  }
+  .btn-success {
+    float: right;
+  }
+  .back  {
+    background: url('../assets/back.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  .container {
+    background: rgb(184,226,245);
+    background: linear-gradient(10deg, rgba(184,226,245,0.9668242296918768) 0%, rgba(184,226,245,0.9612219887955182) 26%, rgba(186,209,219,0.9724264705882353) 59%, rgba(181,204,214,0.8827906162464986) 100%);
+    border-radius: 10px;
+  }
+  #detail {
+    margin-top: 1rem;
+  }
+  textarea::-webkit-scrollbar {
+    width: 12px;
+    background-color: #F5F5F5; }
+
+  textarea::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: #4285F4; }
+  @media only screen and (max-width: 535px) {
+    #detail {
+      font-size: 0.8rem;
+    }
+    .block-space {
+      display: block;
+    }
+    .omitNumb {
+      margin-top: 1rem;
+    }
+    #Number {
+      width: 50%;
+    }
+    .pre {
+      font-size: 0.8rem;
+    }
   }
 </style>
