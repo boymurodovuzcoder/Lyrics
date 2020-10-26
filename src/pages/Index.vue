@@ -1,5 +1,6 @@
 <template>
   <q-page class="flex flex-center back">
+    <vue-topprogress ref="topProgress" color="#F18900" :height="4" :speed="350" ></vue-topprogress>
     <div class="container container-fluid">
       <transition name="bounce">
         <div id="detail" v-if="detail">
@@ -46,9 +47,21 @@
 
 <script>
 import $ from 'jquery'
+import { vueTopprogress } from 'vue-top-progress'
 
 export default {
   name: 'PageIndex',
+  mounted () {
+    this.$refs.topProgress.start()
+
+    // Use setTimeout for demo
+    setTimeout(() => {
+      this.$refs.topProgress.done()
+    }, 2000)
+  },
+  components: {
+    vueTopprogress
+  },
   data () {
     return {
       detail: true,
@@ -94,7 +107,8 @@ export default {
     },
     endAction () {
       for (var i = 0; i < this.result.length; i++) {
-        if (this.result[i].toLocaleLowerCase() === document.getElementById(`${i}`).value.toLocaleLowerCase()) {
+        console.log(this.result[i], ' ', i)
+        if (this.result[i].toLowerCase() === $(`#${i}`).val().toLowerCase()) {
           $(`#${i}`).css('border-color', 'green')
           $(`#${i}`).css('border-width', '0.2rem')
         } else {
@@ -137,7 +151,7 @@ export default {
           var lyrics = this.lyrics
           var index = 0
           result.forEach(word => {
-            lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}" oninput="event.target.value.length == ${word.length} ? $('#${index}').next().focus() : console.log('')">`)
+            lyrics = lyrics.replace(word, `<input type="text" class="rounded" style="width: ${word.length * 10}px; border-color: black; margin:0.1rem;" id="${index}" oninput="$('#${index}').val().length === ${word.length} ? $('#${index}').next().focus() : console.log('')">`)
             index += 1
           })
           this.formatted = lyrics
@@ -170,6 +184,10 @@ export default {
     font-size: 1rem;
     font-weight: 500;
   }
+  xmp {
+    white-space: pre-wrap;
+    word-break: keep-all
+  }
   .bounce-enter-active {
     animation: bounce-in .5s;
   }
@@ -200,8 +218,8 @@ export default {
     background-size: cover;
   }
   .container {
-    background: rgb(184,226,245);
-    background: linear-gradient(10deg, rgba(184,226,245,0.9668242296918768) 0%, rgba(184,226,245,0.9612219887955182) 26%, rgba(186,209,219,0.9724264705882353) 59%, rgba(181,204,214,0.8827906162464986) 100%);
+    background: rgb(186,209,219);
+    background: linear-gradient(10deg, rgba(186,209,219,0.9) 25%, rgba(184,226,245,0.9) 58%, rgba(184,226,245,0.9) 100%);
     border-radius: 10px;
   }
   #detail {
